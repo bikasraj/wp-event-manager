@@ -2046,3 +2046,101 @@ function wpem_convert_php_to_moment_format($format) {
     $momentFormat = strtr($format, $replacements);
     return $momentFormat;
 }
+
+
+//For Past Events
+
+// Add a shortcode for past events
+function wpem_past_events_shortcode($atts) {
+	$args = array(
+	'post_type' => 'event',
+	'posts_per_page' => -1,
+	'meta_key' => '_event_end_date',
+	'orderby' => 'meta_value',
+	'order' => 'DESC',
+	'meta_query' => array(
+	array(
+	'key' => '_event_end_date',
+	'value' => date('Y-m-d'),
+	'compare' => '<',
+	'type' => 'DATE',
+	),
+	),
+	);
+	
+	$query = new WP_Query($args);
+	
+	if ($query->have_posts()) {
+		ob_start();
+		?>
+		<ul>
+			<?php while ($query->have_posts()) : $query->the_post(); ?>
+				<li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
+			<?php endwhile; ?>
+		</ul>
+		<?php
+		wp_reset_postdata();
+	
+		return ob_get_clean();
+	} else {
+		return 'No past events found.';
+	}
+	}
+	add_shortcode('past_events', 'wpem_past_events_shortcode');
+
+
+
+	//For The Event Dashboard
+
+function event_dashboard_shortcode() {
+	ob_start();
+	include 'wp-event-manager-template.php';
+	return ob_get_clean();
+	}
+	add_shortcode('event_dashboard', 'event_dashboard_shortcode');
+	
+	ob_start();
+	include 'wp-event-manager-template.php';
+	return ob_get_clean();
+	}
+	add_shortcode('event_listing', 'event_listing_shortcode');
+
+
+
+//For The event listings and The event submission form
+
+// Shortcode for Event Listings
+function event_listing_shortcode($atts) {
+	ob_start();
+	echo do_shortcode('[event_listing]');
+	return ob_get_clean();
+	}
+	add_shortcode('event_listing', 'event_listing_shortcode');
+	
+	// Shortcode for Event Submission Form
+	function event_submission_form_shortcode($atts) {
+	ob_start();
+	echo do_shortcode('[submit_event_form]');
+	return ob_get_clean();
+	}
+	add_shortcode('event_submission_form', 'event_submission_form_shortcode');
+	
+	// Shortcode for Event Dashboard
+	function event_dashboard_shortcode($atts) {
+	ob_start();
+	echo do_shortcode('[event_dashboard]');
+	return ob_get_clean();
+	}
+	add_shortcode('event_dashboard', 'event_dashboard_shortcode');
+	
+	// Shortcode for Single Event Page
+	function single_event_shortcode($atts) {
+	$atts = shortcode_atts(array(
+	'id' => null, // Specify the event ID here if needed
+	), $atts);
+	
+	ob_start();
+	echo do_shortcode('[single_event id="' . $atts['id'] . '"]');
+	return ob_get_clean();
+	}
+	add_shortcode('single_event', 'single_event_shortcode');
